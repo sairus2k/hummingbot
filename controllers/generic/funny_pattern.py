@@ -29,10 +29,12 @@ class FunnyPatternConfig(ControllerConfigBase):
     whenever the Funny-Pattern signal occurs.
     """
 
+    id: str = Field(default_factory=lambda: "funny_pattern_" + str(int(time.time())))
+    controller_type: str = "generic"
     controller_name: str = "funny_pattern"
 
     # -------------------- market / candle feed --------------------
-    connector: str = Field(
+    connector_name: str = Field(
         default="binance_perpetual",
         json_schema_extra={"prompt": "Connector to trade on: ", "prompt_on_new": True},
     )
@@ -95,7 +97,7 @@ class FunnyPatternConfig(ControllerConfigBase):
         if not self.candles_config:
             self.candles_config = [
                 CandlesConfig(
-                    connector=self.connector,
+                    connector=self.connector_name,
                     trading_pair=self.trading_pair,
                     interval=self.candle_interval,
                     max_records=200,
@@ -104,7 +106,7 @@ class FunnyPatternConfig(ControllerConfigBase):
 
     # strategy-runner helper – adds market to HB
     def update_markets(self, markets: Dict[str, Set[str]]) -> Dict[str, Set[str]]:
-        markets.setdefault(self.connector, set()).add(self.trading_pair)
+        markets.setdefault(self.connector_name, set()).add(self.trading_pair)
         return markets
 
 
@@ -166,7 +168,7 @@ class FunnyPattern(ControllerBase):
         in self.processed_data[SIGNAL_KEY]
         """
         df = self.market_data_provider.get_candles_df(
-            self.config.connector, self.config.trading_pair, self.config.candle_interval
+            self.config.connector_name, self.config.trading_pair, self.config.candle_interval
         )
 
         if df is None or len(df) < 2:
@@ -188,7 +190,7 @@ class FunnyPattern(ControllerBase):
         return DCAExecutorConfig(
             controller_id=self.config.id,
             timestamp=time.time(),
-            connector_name=self.config.connector,
+            connector_name=self.config.connector_name,
             trading_pair=self.config.trading_pair,
             mode=DCAMode.MAKER,
             leverage=self.config.leverage,
@@ -221,7 +223,7 @@ class FunnyPattern(ControllerBase):
 
         trade_type = TradeType.BUY if signal == "long" else TradeType.SELL
         price = self.market_data_provider.get_price_by_type(
-            self.config.connector, self.config.trading_pair, PriceType.MidPrice
+            self.config.connector_name, self.config.trading_pair, PriceType.MidPrice
         )
         if price is None:
             return executor_actions
