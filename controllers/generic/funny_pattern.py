@@ -6,8 +6,13 @@ import pandas as pd
 from pydantic import Field
 
 from hummingbot.client.ui.interface_utils import format_df_for_printout
+from hummingbot.core.data_type.common import PriceType, TradeType
 from hummingbot.data_feed.candles_feed.data_types import CandlesConfig
-
+from hummingbot.strategy_v2.executors.position_executor.data_types import PositionExecutorConfig, TripleBarrierConfig
+from hummingbot.strategy_v2.models.executor_actions import (
+    CreateExecutorAction,
+    ExecutorAction,
+)
 from hummingbot.strategy_v2.controllers.directional_trading_controller_base import (
     DirectionalTradingControllerBase,
     DirectionalTradingControllerConfigBase,
@@ -22,62 +27,32 @@ class FunnyPatternConfig(DirectionalTradingControllerConfigBase):
     id: str = Field(default_factory=lambda: "funny_pattern_" + str(int(time.time())))
     controller_type: str = "generic"
     controller_name: str = "funny_pattern"
+    candles_config: List[CandlesConfig] = []
 
     # -------------------- market / candle feed --------------------
     connector_name: str = Field(
-        default="binance_perpetual",
-        json_schema_extra={"prompt": "Connector to trade on: ", "prompt_on_new": True},
-    )
+        default=None,
+        json_schema_extra={"prompt": "Connector to trade on: ", "prompt_on_new": True})
     trading_pair: str = Field(
-        default="BTC-USDT",
+        default=None,
         json_schema_extra={
             "prompt": "Trading pair (exchange format, e.g. BTC-USDT): ",
-            "prompt_on_new": True,
-        },
-    )
-    candle_interval: str = Field(
-        default="1m",
+            "prompt_on_new": True})
+    candles_connector: str = Field(
+        default=None,
         json_schema_extra={
-            "prompt": "Candle interval (e.g. 1m, 5m): ",
-            "prompt_on_new": False,
-        },
-    )
-
-    candles_config: List[CandlesConfig] = []
-
-    # -------------------- risk & trade params --------------------
-    order_amount: Decimal = Field(
-        default=Decimal("0.01"),
-        json_schema_extra={"prompt": "Order amount (quote): ", "prompt_on_new": True},
-    )
-    take_profit: Decimal = Field(
-        default=Decimal("0.005"),
+            "prompt": "Enter the connector for the candles data, leave empty to use the same exchange as the connector: ",
+            "prompt_on_new": True})
+    candles_trading_pair: str = Field(
+        default=None,
         json_schema_extra={
-            "prompt": "Take-profit % (as decimal, e.g. 0.005 = 0.5%): ",
-            "prompt_on_new": True,
-        },
-    )
-    stop_loss: Decimal = Field(
-        default=Decimal("0.01"),
+            "prompt": "Enter the trading pair for the candles data, leave empty to use the same trading pair as the connector: ",
+            "prompt_on_new": True})
+    interval: str = Field(
+        default="3m",
         json_schema_extra={
-            "prompt": "Stop-loss % (as decimal, e.g. 0.01 = 1%): ",
-            "prompt_on_new": True,
-        },
-    )
-    time_limit: int = Field(
-        default=1800,
-        json_schema_extra={
-            "prompt": "Maximum position lifetime in seconds (0 = disabled): ",
-            "prompt_on_new": False,
-        },
-    )
-    leverage: int = Field(
-        default=1,
-        json_schema_extra={
-            "prompt": "Leverage (1 for spot): ",
-            "prompt_on_new": False,
-        },
-    )
+            "prompt": "Enter the candle interval (e.g., 1m, 5m, 1h, 1d): ",
+            "prompt_on_new": True})
 
     # -----------------------------------------------------------------
 
@@ -89,7 +64,7 @@ class FunnyPatternConfig(DirectionalTradingControllerConfigBase):
                 CandlesConfig(
                     connector=self.connector_name,
                     trading_pair=self.trading_pair,
-                    interval=self.candle_interval,
+                    interval=self.interval,
                     max_records=200,
                 )
             ]
@@ -162,7 +137,7 @@ class FunnyPattern(DirectionalTradingControllerBase):
         df = self.market_data_provider.get_candles_df(
             connector_name=self.config.connector_name,
             trading_pair=self.config.trading_pair,
-            interval=self.config.candle_interval,
+            interval=self.config.interval,
             max_records=self.max_records,
         )
 
