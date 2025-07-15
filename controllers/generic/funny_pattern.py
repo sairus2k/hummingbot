@@ -141,36 +141,44 @@ class FunnyPattern(DirectionalTradingControllerBase):
             max_records=self.max_records,
         )
 
-        if df is None or len(df) < 2:
+        if df is None or len(df) < 3:  # Need at least 3 candles (2 for analysis plus 1 current)
             self.processed_data["features"] = pd.DataFrame()
             self.processed_data["signal"] = 0
             return
 
+        # Exclude the last candle as it's likely still forming
+        analysis_df = df.iloc[:-1].copy()
+
         # Get the current candle timestamp and interval to determine if a new candle has closed
         current_time = self.market_data_provider.time() * 1000  # Convert to milliseconds
-        last_candle_timestamp = df.iloc[-1]["timestamp"]
+        last_closed_candle_timestamp = analysis_df.iloc[-1]["timestamp"]
 
         # Check if we've already analyzed this set of candles
         last_analyzed_timestamp = self.processed_data.get("last_analyzed_timestamp", 0)
 
-        # Only analyze if a new candle has closed (last candle timestamp has changed since last analysis)
-        if last_candle_timestamp > last_analyzed_timestamp:
+        # Only analyze if a new candle has closed
+        if last_closed_candle_timestamp > last_analyzed_timestamp:
+            self.logger().info(f"Analyzing new closed candle at {last_closed_candle_timestamp}")
+
             signals = [0]
-            for i in range(1, len(df)):
-                prev_c = df.iloc[i - 1]
-                curr_c = df.iloc[i]
+            for i in range(1, len(analysis_df)):
+                prev_c = analysis_df.iloc[i - 1]
+                curr_c = analysis_df.iloc[i]
                 sig = self._analyze_candles(prev_c, curr_c)
                 signals.append(sig if sig is not None else 0)
 
-            df["signal"] = signals
-            self.processed_data["features"] = df
+            analysis_df["signal"] = signals
+            self.processed_data["features"] = analysis_df
             self.processed_data["signal"] = signals[-1]
-            self.processed_data["last_analyzed_timestamp"] = last_candle_timestamp
+            self.logger().info(f"Signal analysis complete. Signals: {signals}")
+            self.processed_data["last_analyzed_timestamp"] = last_closed_candle_timestamp
 
             # Log when pattern is detected
             if signals[-1] != 0:
                 direction = "LONG" if signals[-1] > 0 else "SHORT"
-                self.logger().info(f"Funny Pattern detected: {direction} signal at timestamp {last_candle_timestamp}")
+                self.logger().info(f"Funny Pattern detected: {direction} signal at timestamp {last_closed_candle_timestamp}")
+        else:
+            self.logger().debug(f"No new closed candle to analyze. Last analyzed: {last_analyzed_timestamp}, Last closed: {last_closed_candle_timestamp}")
 
     # -----------------------------------------------------------------
     # CLI / status display
