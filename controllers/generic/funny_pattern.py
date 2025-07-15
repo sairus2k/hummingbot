@@ -1,14 +1,11 @@
 import time
-from decimal import Decimal
 from typing import Dict, List, Set
 
 import pandas as pd
 from pydantic import Field
 
 from hummingbot.client.ui.interface_utils import format_df_for_printout
-from hummingbot.core.data_type.common import TradeType, OrderType
 from hummingbot.data_feed.candles_feed.data_types import CandlesConfig
-from hummingbot.strategy_v2.executors.position_executor.data_types import PositionExecutorConfig, TripleBarrierConfig
 from hummingbot.strategy_v2.controllers.directional_trading_controller_base import (
     DirectionalTradingControllerBase,
     DirectionalTradingControllerConfigBase,
@@ -192,30 +189,3 @@ class FunnyPattern(DirectionalTradingControllerBase):
             lines.append("No active executors.")
 
         return lines
-
-    def get_executor_config(self, trade_type: TradeType, price: Decimal, amount: Decimal):
-        """
-        Override the base method to use LIMIT orders for stop loss.
-        """
-        # Create a custom triple barrier config with LIMIT stop loss
-        triple_barrier_config = TripleBarrierConfig(
-            stop_loss=self.config.stop_loss,
-            take_profit=self.config.take_profit,
-            time_limit=self.config.time_limit,
-            trailing_stop=self.config.trailing_stop,
-            open_order_type=OrderType.MARKET,
-            take_profit_order_type=self.config.take_profit_order_type,
-            stop_loss_order_type=OrderType.LIMIT,  # Set to LIMIT instead of MARKET
-            time_limit_order_type=OrderType.MARKET
-        )
-
-        return PositionExecutorConfig(
-            timestamp=self.market_data_provider.time(),
-            connector_name=self.config.connector_name,
-            trading_pair=self.config.trading_pair,
-            side=trade_type,
-            entry_price=price,
-            amount=amount,
-            triple_barrier_config=triple_barrier_config,
-            leverage=self.config.leverage,
-        )
