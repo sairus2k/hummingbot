@@ -152,8 +152,6 @@ class FunnyPattern(DirectionalTradingControllerBase):
 
         # Only analyze if a new candle has closed
         if last_closed_candle_timestamp > last_analyzed_timestamp:
-            self.logger().info(f"Analyzing new closed candle at {last_closed_candle_timestamp}")
-
             signals = [0]
             for i in range(1, len(analysis_df)):
                 prev_c = analysis_df.iloc[i - 1]
@@ -164,7 +162,6 @@ class FunnyPattern(DirectionalTradingControllerBase):
             analysis_df["signal"] = signals
             self.processed_data["features"] = analysis_df
             self.processed_data["signal"] = signals[-1]
-            self.logger().info(f"Signal analysis complete. Signals: {signals}")
             self.processed_data["last_analyzed_timestamp"] = last_closed_candle_timestamp
 
             # Log when the pattern is detected
