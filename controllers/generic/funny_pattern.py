@@ -5,6 +5,7 @@ import pandas as pd
 from pydantic import Field
 
 from hummingbot.client.ui.interface_utils import format_df_for_printout
+from hummingbot.core.data_type.common import TradeType
 from hummingbot.data_feed.candles_feed.data_types import CandlesConfig
 from hummingbot.strategy_v2.controllers.directional_trading_controller_base import (
     DirectionalTradingControllerBase,
@@ -189,3 +190,25 @@ class FunnyPattern(DirectionalTradingControllerBase):
             lines.append("No active executors.")
 
         return lines
+
+    def can_create_executor(self, signal: int) -> bool:
+        """
+        Check if an executor can be created based on the signal, the quantity of active executors and the cooldown time.
+        Enhanced to respect cooldown_time for all executors, not just active ones.
+        """
+        active_executors_by_signal_side = self.filter_executors(
+            executors=self.executors_info,
+            filter_func=lambda x: x.is_active and (x.side == TradeType.BUY if signal > 0 else TradeType.SELL))
+
+        # Check active executors limit
+        active_executors_condition = len(active_executors_by_signal_side) < self.config.max_executors_per_side
+
+        # Check cooldown against ALL executors of the same side (not just active ones)
+        all_executors_by_signal_side = self.filter_executors(
+            executors=self.executors_info,
+            filter_func=lambda x: x.side == TradeType.BUY if signal > 0 else TradeType.SELL)
+
+        max_timestamp = max([executor.timestamp for executor in all_executors_by_signal_side], default=0)
+        cooldown_condition = self.market_data_provider.time() - max_timestamp > self.config.cooldown_time
+
+        return active_executors_condition and cooldown_condition
