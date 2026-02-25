@@ -214,7 +214,8 @@ class MarketMakingControllerConfigBase(ControllerConfigBase):
             normalized_amounts_pct = [amt_pct / total_pct for amt_pct in sell_amounts_pct]
 
         spreads = getattr(self, f'{trade_type.name.lower()}_spreads')
-        return spreads, [amt_pct * self.total_amount_quote for amt_pct in normalized_amounts_pct]
+        total_amount_quote = float(self.total_amount_quote)
+        return spreads, [amt_pct * total_amount_quote for amt_pct in normalized_amounts_pct]
 
     def get_required_base_amount(self, reference_price: Decimal) -> Decimal:
         """
