@@ -17,7 +17,8 @@
 ###############################################################################
 
 # --- Markets (must match what the controller trades) ---
-markets: "binance.ETH-USDT"
+# Format: "connector.TRADING-PAIR"  e.g. "mexc.SUKU-USDT", "binance.ETH-USDT"
+markets: "mexc.SUKU-USDT"
 candles_config: []
 
 # --- Controller config file(s) to load ---
