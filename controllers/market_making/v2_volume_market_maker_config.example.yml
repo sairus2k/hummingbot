@@ -1,0 +1,70 @@
+###############################################################################
+# Volume Market Maker - Controller Configuration
+#
+# SETUP: Copy this file to conf/controllers/
+#   cp controllers/market_making/v2_volume_market_maker_config.example.yml \
+#      conf/controllers/v2_volume_market_maker.yml
+#
+# Then start with:
+#   start --script v2_with_controllers.py --conf v2_volume_market_maker.yml
+#
+# Or use the standalone script directly (no YAML needed):
+#   start --script v2_volume_market_maker.py
+#
+# Goal: Maximize trading volume while preserving capital.
+###############################################################################
+
+# --- Required identifiers (do not change) ---
+controller_type: market_making
+controller_name: v2_volume_market_maker
+
+# --- Exchange & pair ---
+connector_name: binance_perpetual
+trading_pair: ETH-USDT
+
+# --- Capital allocation ---
+total_amount_quote: 1000       # Total capital in quote asset (USDT)
+leverage: 1                    # Leverage (1 = no leverage, use higher for perps)
+position_mode: HEDGE           # HEDGE or ONEWAY
+
+# --- Spread levels (tighter = more volume, wider = safer) ---
+# 3 levels per side: 0.05%, 0.1%, 0.2% from mid-price
+buy_spreads: "0.0005,0.001,0.002"
+sell_spreads: "0.0005,0.001,0.002"
+
+# Order size distribution (equal across levels by default)
+# Uncomment to customize:
+# buy_amounts_pct: "40,35,25"
+# sell_amounts_pct: "40,35,25"
+
+# --- Order timing ---
+executor_refresh_time: 60      # Refresh stale orders every 60 seconds
+cooldown_time: 5               # Wait 5 seconds after a fill before replacing
+
+# --- Risk management (Triple Barrier) ---
+stop_loss: 0.01                # 1% stop loss per position
+take_profit: 0.005             # 0.5% take profit per position
+time_limit: 900                # 15 minute max hold time
+take_profit_order_type: LIMIT  # Use LIMIT for TP (saves fees), MARKET for speed
+# trailing_stop: "0.004,0.002" # Uncomment to enable trailing stop (activation, delta)
+
+# --- Volatility-based spread adjustment (NATR) ---
+# Candle source for volatility calculation (defaults to same as trading pair)
+# candles_connector: binance_perpetual
+# candles_trading_pair: ETH-USDT
+interval: 3m                   # Candle interval for NATR
+natr_length: 14                # NATR lookback period
+
+# When current NATR > volatility_target, spreads widen proportionally
+# When current NATR < volatility_target, spreads stay at min_spread_factor
+volatility_target: 0.002       # 0.2% NATR baseline
+min_spread_factor: 1.0         # Minimum spread multiplier (floor)
+max_spread_factor: 5.0         # Maximum spread multiplier (cap)
+
+# --- Inventory management ---
+# Shifts mid-price against accumulated inventory to encourage rebalancing
+# 0 = no skew, 1 = aggressive skew
+inventory_skew_factor: 0.5
+
+# Stop placing orders on the heavy side when inventory exceeds this % of capital
+max_inventory_pct: 0.3         # 30% of total_amount_quote

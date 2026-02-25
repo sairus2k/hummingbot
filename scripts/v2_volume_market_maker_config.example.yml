@@ -1,0 +1,32 @@
+###############################################################################
+# Volume Market Maker - Script Configuration (for v2_with_controllers.py)
+#
+# SETUP: Copy this file to conf/scripts/
+#   cp scripts/v2_volume_market_maker_config.example.yml \
+#      conf/scripts/v2_volume_market_maker.yml
+#
+# Also copy the controller config:
+#   cp controllers/market_making/v2_volume_market_maker_config.example.yml \
+#      conf/controllers/v2_volume_market_maker.yml
+#
+# Then start Hummingbot and run:
+#   start --script v2_with_controllers.py --conf v2_volume_market_maker.yml
+#
+# Alternatively, use the standalone script (no YAML needed):
+#   start --script v2_volume_market_maker.py
+###############################################################################
+
+# --- Markets (must match what the controller trades) ---
+markets: "binance_perpetual.ETH-USDT"
+candles_config: []
+
+# --- Controller config file(s) to load ---
+# Paths are relative to conf/controllers/
+controllers_config: "v2_volume_market_maker.yml"
+
+# --- Drawdown protection ---
+# Stop a single controller if its drawdown exceeds this (in quote asset)
+max_controller_drawdown_quote: 50
+
+# Stop the entire strategy if global drawdown exceeds this
+max_global_drawdown_quote: 100
