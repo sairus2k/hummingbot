@@ -223,7 +223,7 @@ class MarketMakingControllerConfigBase(ControllerConfigBase):
         """
         _, sell_amounts_quote = self.get_spreads_and_amounts_in_quote(TradeType.SELL)
         total_sell_amount_quote = sum(sell_amounts_quote)
-        return total_sell_amount_quote / reference_price
+        return Decimal(str(total_sell_amount_quote)) / reference_price
 
     def update_markets(self, markets: MarketDict) -> MarketDict:
         return markets.add_or_update(self.connector_name, self.trading_pair)
