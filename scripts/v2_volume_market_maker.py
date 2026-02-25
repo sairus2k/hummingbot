@@ -123,6 +123,9 @@ class VolumeMMConfig(StrategyV2ConfigBase):
         default=Decimal("50"),
         json_schema_extra={"prompt": "Enter max drawdown in quote to stop trading (e.g., 50): ", "prompt_on_new": True}
     )
+    # Aliases for v2_with_controllers.py YAML compatibility
+    max_controller_drawdown_quote: Optional[float] = None
+    max_global_drawdown_quote: Optional[float] = None
 
 
 class VolumeMarketMakerScript(StrategyV2Base):
