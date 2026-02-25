@@ -16,7 +16,7 @@ services:
       - ./certs:/home/hummingbot/certs
       - ./scripts:/home/hummingbot/scripts
       - ./controllers:/home/hummingbot/controllers
-      - ./hummingbot:/home/hummingbot/hummingbot
+      - ./hummingbot/strategy_v2/controllers/market_making_controller_base.py:/home/hummingbot/hummingbot/strategy_v2/controllers/market_making_controller_base.py
     logging:
       driver: "json-file"
       options:
