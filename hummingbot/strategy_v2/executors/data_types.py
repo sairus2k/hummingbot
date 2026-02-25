@@ -16,7 +16,7 @@ class ExecutorConfigBase(BaseModel):
     type: Literal["position_executor", "dca_executor", "grid_executor", "order_executor",
                   "xemm_executor", "arbitrage_executor", "twap_executor"]
     timestamp: Optional[float] = None
-    controller_id: str = "main"
+    controller_id: Optional[str] = "main"
 
     @field_validator("timestamp", mode="before")
     @classmethod
