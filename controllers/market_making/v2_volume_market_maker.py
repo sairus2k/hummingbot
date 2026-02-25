@@ -180,11 +180,16 @@ class VolumeMarketMaker(MarketMakingControllerBase):
 
     def __init__(self, config: VolumeMarketMakerConfig, *args, **kwargs):
         self.config = config
+        # Ensure candles fields are resolved (validators may not fire when config is built programmatically)
+        if not self.config.candles_connector:
+            self.config.candles_connector = config.connector_name
+        if not self.config.candles_trading_pair:
+            self.config.candles_trading_pair = config.trading_pair
         self.max_records = config.natr_length + 50
         if len(self.config.candles_config) == 0:
             self.config.candles_config = [CandlesConfig(
-                connector=config.candles_connector,
-                trading_pair=config.candles_trading_pair,
+                connector=self.config.candles_connector,
+                trading_pair=self.config.candles_trading_pair,
                 interval=config.interval,
                 max_records=self.max_records
             )]
