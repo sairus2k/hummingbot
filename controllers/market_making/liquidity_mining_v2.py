@@ -57,9 +57,9 @@ class LiquidityMiningV2Config(MarketMakingControllerConfigBase):
         },
     )
     interval: str = Field(
-        default="3m",
+        default="5m",
         json_schema_extra={
-            "prompt": "Enter the candle interval (e.g., 1m, 3m, 5m): ",
+            "prompt": "Enter the candle interval (e.g., 1m, 5m, 15m): ",
             "prompt_on_new": True,
         },
     )
