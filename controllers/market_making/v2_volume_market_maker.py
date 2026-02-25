@@ -5,13 +5,13 @@ import pandas_ta as ta  # noqa: F401
 from pydantic import Field, field_validator
 from pydantic_core.core_schema import ValidationInfo
 
-from hummingbot.core.data_type.common import PriceType, TradeType
+from hummingbot.core.data_type.common import OrderType, PriceType, TradeType
 from hummingbot.data_feed.candles_feed.data_types import CandlesConfig
 from hummingbot.strategy_v2.controllers.market_making_controller_base import (
     MarketMakingControllerBase,
     MarketMakingControllerConfigBase,
 )
-from hummingbot.strategy_v2.executors.position_executor.data_types import PositionExecutorConfig
+from hummingbot.strategy_v2.executors.position_executor.data_types import PositionExecutorConfig, TripleBarrierConfig
 from hummingbot.strategy_v2.models.executor_actions import ExecutorAction, StopExecutorAction
 
 
@@ -165,6 +165,19 @@ class VolumeMarketMakerConfig(MarketMakingControllerConfigBase):
         if v is None or v == "":
             return validation_info.data.get("trading_pair")
         return v
+
+    @property
+    def triple_barrier_config(self) -> TripleBarrierConfig:
+        return TripleBarrierConfig(
+            stop_loss=self.stop_loss,
+            take_profit=self.take_profit,
+            time_limit=self.time_limit,
+            trailing_stop=self.trailing_stop,
+            open_order_type=OrderType.LIMIT_MAKER,
+            take_profit_order_type=OrderType.LIMIT_MAKER,
+            stop_loss_order_type=OrderType.MARKET,
+            time_limit_order_type=OrderType.MARKET,
+        )
 
 
 class VolumeMarketMaker(MarketMakingControllerBase):
