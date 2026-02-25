@@ -19,13 +19,12 @@ controller_type: market_making
 controller_name: v2_volume_market_maker
 
 # --- Exchange & pair ---
-connector_name: binance_perpetual
+connector_name: binance
 trading_pair: ETH-USDT
 
 # --- Capital allocation ---
 total_amount_quote: 1000       # Total capital in quote asset (USDT)
-leverage: 1                    # Leverage (1 = no leverage, use higher for perps)
-position_mode: HEDGE           # HEDGE or ONEWAY
+leverage: 1                    # Set to 1 for spot trading
 
 # --- Spread levels (tighter = more volume, wider = safer) ---
 # 3 levels per side: 0.05%, 0.1%, 0.2% from mid-price
@@ -50,9 +49,9 @@ take_profit_order_type: LIMIT  # Use LIMIT for TP (saves fees), MARKET for speed
 
 # --- Volatility-based spread adjustment (NATR) ---
 # Candle source for volatility calculation (defaults to same as trading pair)
-# candles_connector: binance_perpetual
+# candles_connector: binance
 # candles_trading_pair: ETH-USDT
-interval: 3m                   # Candle interval for NATR
+interval: 1m                   # Candle interval for NATR (1m is universally supported)
 natr_length: 14                # NATR lookback period
 
 # When current NATR > volatility_target, spreads widen proportionally

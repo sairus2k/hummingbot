@@ -32,6 +32,20 @@ class VolumeMarketMakerConfig(MarketMakingControllerConfigBase):
     controller_name: str = "v2_volume_market_maker"
     controller_type: str = "market_making"
 
+    # Spot defaults (override parent perpetual defaults)
+    connector_name: str = Field(
+        default="binance",
+        json_schema_extra={
+            "prompt": "Enter the connector name (e.g., binance): ",
+            "prompt_on_new": True}
+    )
+    leverage: int = Field(
+        default=1,
+        json_schema_extra={
+            "prompt": "Enter leverage (1 for spot): ",
+            "prompt_on_new": True}
+    )
+
     # Tight spreads for maximum fill rate (3 levels per side)
     buy_spreads: List[float] = Field(
         default="0.0005,0.001,0.002",
@@ -94,9 +108,9 @@ class VolumeMarketMakerConfig(MarketMakingControllerConfigBase):
             "prompt_on_new": True}
     )
     interval: str = Field(
-        default="3m",
+        default="1m",
         json_schema_extra={
-            "prompt": "Enter candle interval (e.g., 1m, 3m, 5m): ",
+            "prompt": "Enter candle interval (e.g., 1m, 5m, 15m): ",
             "prompt_on_new": True}
     )
     natr_length: int = Field(

@@ -17,7 +17,7 @@
 ###############################################################################
 
 # --- Markets (must match what the controller trades) ---
-markets: "binance_perpetual.ETH-USDT"
+markets: "binance.ETH-USDT"
 candles_config: []
 
 # --- Controller config file(s) to load ---

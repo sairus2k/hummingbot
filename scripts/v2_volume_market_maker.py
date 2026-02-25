@@ -44,7 +44,7 @@ class VolumeMMConfig(StrategyV2ConfigBase):
 
     # --- Main settings ---
     connector_name: str = Field(
-        default="binance_perpetual",
+        default="binance",
         json_schema_extra={"prompt": "Enter the connector name: ", "prompt_on_new": True}
     )
     trading_pair: str = Field(
@@ -99,7 +99,7 @@ class VolumeMMConfig(StrategyV2ConfigBase):
     )
 
     # --- Volatility ---
-    interval: str = Field(default="3m")
+    interval: str = Field(default="1m")
     natr_length: int = Field(default=14)
     volatility_target: float = Field(
         default=0.002,
