@@ -16,6 +16,9 @@ services:
       - ./certs:/home/hummingbot/certs
       - ./scripts:/home/hummingbot/scripts
       - ./controllers:/home/hummingbot/controllers
+      # Mount patched core files into the container
+      - ./hummingbot/strategy_v2/executors/data_types.py:/home/hummingbot/hummingbot/strategy_v2/executors/data_types.py
+      - ./hummingbot/model/executors.py:/home/hummingbot/hummingbot/model/executors.py
     logging:
       driver: "json-file"
       options:
