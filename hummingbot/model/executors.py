@@ -40,6 +40,11 @@ class Executors(HummingbotBase):
         """
         close_type = CloseType(self.close_type) if self.close_type else None
         status = RunnableStatus(self.status)
+        config = self.config
+        # Ensure controller_id inside the config JSON is never None,
+        # as it may have been stored as null by older code.
+        if isinstance(config, dict) and config.get("controller_id") is None:
+            config = {**config, "controller_id": self.controller_id or "main"}
         return ExecutorInfo(
             id=self.id,
             timestamp=self.timestamp,
@@ -47,7 +52,7 @@ class Executors(HummingbotBase):
             close_type=close_type,
             close_timestamp=self.close_timestamp,
             status=status,
-            config=self.config,
+            config=config,
             net_pnl_pct=Decimal(self.net_pnl_pct),
             net_pnl_quote=Decimal(self.net_pnl_quote),
             cum_fees_quote=Decimal(self.cum_fees_quote),
