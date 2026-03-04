@@ -19,17 +19,18 @@ controller_type: market_making
 controller_name: v2_volume_market_maker
 
 # --- Exchange & pair ---
-connector_name: binance
-trading_pair: ETH-USDT
+connector_name: mexc
+trading_pair: SUKU-USDT
 
 # --- Capital allocation ---
-total_amount_quote: 1000       # Total capital in quote asset (USDT)
+total_amount_quote: 100        # Total capital in quote asset (USDT)
 leverage: 1                    # Set to 1 for spot trading
+position_mode: HEDGE
 
 # --- Spread levels (tighter = more volume, wider = safer) ---
-# 3 levels per side: 0.05%, 0.1%, 0.2% from mid-price
-buy_spreads: "0.0005,0.001,0.002"
-sell_spreads: "0.0005,0.001,0.002"
+# 3 levels per side: 0.1%, 0.2%, 0.4% from mid-price
+buy_spreads: "0.001,0.002,0.004"
+sell_spreads: "0.001,0.002,0.004"
 
 # Order size distribution (equal across levels by default)
 # Uncomment to customize:
@@ -41,8 +42,8 @@ executor_refresh_time: 60      # Refresh stale orders every 60 seconds
 cooldown_time: 5               # Wait 5 seconds after a fill before replacing
 
 # --- Risk management (Triple Barrier) ---
-stop_loss: 0.01                # 1% stop loss per position
-take_profit: 0.005             # 0.5% take profit per position
+stop_loss: 0.02                # 2% stop loss per position
+take_profit: 0.01              # 1% take profit per position
 time_limit: 900                # 15 minute max hold time
 take_profit_order_type: LIMIT  # Use LIMIT for TP (saves fees), MARKET for speed
 # trailing_stop: "0.004,0.002" # Uncomment to enable trailing stop (activation, delta)
